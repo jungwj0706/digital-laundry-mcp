@@ -6,6 +6,8 @@ import { registerCaseTools } from "./tools/cases.js";
 import { registerFetchTool } from "./tools/fetchPage.js";
 import { registerImageTool } from "./tools/images.js";
 import { registerPolicyTools } from "./tools/policy.js";
+import { registerPrompts } from "./prompts/registerPrompts.js";
+import { registerResources } from "./resources/registerResources.js";
 import { registerReportTool } from "./tools/report.js";
 import { registerSearchTools, type SearchDependencies } from "./tools/search.js";
 import { registerStatusTool } from "./tools/status.js";
@@ -26,5 +28,7 @@ export function createServer(
   registerCaseTools(server, config);
   registerFetchTool(server, config, deps);
   registerImageTool(server, config, deps);
+  registerResources(server, config);
+  registerPrompts(server);
   return server;
 }
