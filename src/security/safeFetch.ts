@@ -163,18 +163,17 @@ function mediaType(header: string | null): string {
   return (header ?? "").split(";")[0]?.trim().toLowerCase() ?? "";
 }
 
-async function readLimited(response: Response, maxBytes: number): Promise<string> {
+async function readLimitedBytes(
+  response: Response,
+  maxBytes: number,
+  sizeCode: "content_type_not_supported" | "image_too_large" = "content_type_not_supported",
+): Promise<Buffer> {
   const declared = Number(response.headers.get("content-length") ?? "");
   if (Number.isFinite(declared) && declared > maxBytes) {
-    throw new AppError(
-      "content_type_not_supported",
-      "응답이 허용된 크기를 초과했습니다.",
-      false,
-      "더 작은 공개 페이지만 분석할 수 있습니다.",
-    );
+    throw new AppError(sizeCode, "응답이 허용된 크기를 초과했습니다.", false, "더 작은 파일만 처리할 수 있습니다.");
   }
   if (!response.body) {
-    return "";
+    return Buffer.alloc(0);
   }
   const reader = response.body.getReader();
   const chunks: Uint8Array[] = [];
@@ -187,16 +186,16 @@ async function readLimited(response: Response, maxBytes: number): Promise<string
     total += next.value.byteLength;
     if (total > maxBytes) {
       await reader.cancel();
-      throw new AppError(
-        "content_type_not_supported",
-        "응답이 허용된 크기를 초과했습니다.",
-        false,
-        "더 작은 공개 페이지만 분석할 수 있습니다.",
-      );
+      throw new AppError(sizeCode, "응답이 허용된 크기를 초과했습니다.", false, "더 작은 파일만 처리할 수 있습니다.");
     }
     chunks.push(next.value);
   }
-  return Buffer.concat(chunks).toString("utf8");
+  return Buffer.concat(chunks);
+}
+
+async function readLimited(response: Response, maxBytes: number): Promise<string> {
+  const bytes = await readLimitedBytes(response, maxBytes);
+  return bytes.toString("utf8");
 }
 
 function escapeRegExp(value: string): string {
@@ -432,6 +431,54 @@ export async function safeFetch(input: string, options: SafeFetchOptions): Promi
       excerpt: extracted.excerpt,
       untrusted: true,
     };
+  }
+  throw unsafe("리다이렉트 한도를 초과했습니다.");
+}
+
+const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+export async function safeReadBytes(
+  input: string,
+  options: SafeFetchOptions,
+): Promise<{ bytes: Buffer; contentType: string; url: string }> {
+  let current: URL;
+  try {
+    current = new URL(input);
+  } catch {
+    throw unsafe("URL 형식이 올바르지 않습니다.");
+  }
+  const lookup = options.lookup ?? defaultLookup;
+  const fetchImpl = options.fetchImpl ?? fetch;
+  for (let redirect = 0; redirect <= 3; redirect += 1) {
+    await assertPublicUrl(current, lookup);
+    const response = await fetchOnce(current, options.timeoutMs, fetchImpl, "image/jpeg,image/png,image/webp");
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get("location");
+      if (!location || redirect === 3) {
+        throw unsafe("리다이렉트 한도를 초과했습니다.");
+      }
+      current = new URL(location, current);
+      continue;
+    }
+    if (!response.ok) {
+      throw new AppError(
+        "provider_error",
+        "이미지를 가져오지 못했습니다.",
+        response.status >= 500,
+        "공개 이미지 주소인지 확인하세요.",
+      );
+    }
+    const contentType = mediaType(response.headers.get("content-type"));
+    if (!IMAGE_TYPES.has(contentType)) {
+      throw new AppError(
+        "invalid_image",
+        "JPEG, PNG, WebP 이미지만 사용할 수 있습니다.",
+        false,
+        "이미지 파일 형식을 확인하세요.",
+      );
+    }
+    const bytes = await readLimitedBytes(response, options.maxBytes, "image_too_large");
+    return { bytes, contentType, url: current.toString() };
   }
   throw unsafe("리다이렉트 한도를 초과했습니다.");
 }

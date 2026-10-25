@@ -8,6 +8,7 @@ import type { SearchProvider } from "./interfaces.js";
 export interface ProviderRuntime {
   fetchImpl?: typeof fetch;
   sleep?: (ms: number) => Promise<void>;
+  lookup?: (hostname: string) => Promise<string[]>;
 }
 
 export function selectSearchProvider(
