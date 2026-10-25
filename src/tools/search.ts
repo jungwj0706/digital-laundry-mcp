@@ -1,20 +1,14 @@
 import type { McpServer } from "@modelcontextprotocol/server";
 import * as z from "zod/v4";
 import type { AppConfig } from "../config/env.js";
-import { README_SECTIONS } from "../config/constants.js";
 import { AppError, errorResult } from "../domain/errors.js";
 import { partialFailureSchema, searchResultSchema, toolFailureSchema } from "../domain/schemas.js";
 import { logEvent } from "../logging/logger.js";
-import { BraveSearchProvider } from "../providers/search/BraveSearchProvider.js";
-import { DemoSearchProvider } from "../providers/search/DemoSearchProvider.js";
-import type { SearchProvider } from "../providers/interfaces.js";
-import { planQueries, applyDomains } from "../services/queryPlanner.js";
+import { selectSearchProvider, type ProviderRuntime } from "../providers/selectSearchProvider.js";
+import { applyDomains, planQueries } from "../services/queryPlanner.js";
 import { executeSearch } from "../services/searchService.js";
 
-export interface SearchDependencies {
-  fetchImpl?: typeof fetch;
-  sleep?: (ms: number) => Promise<void>;
-}
+export type SearchDependencies = ProviderRuntime;
 
 const previewInputSchema = z.object({
   aliases: z.array(z.string().min(1).max(80)).min(1).max(10),
@@ -48,34 +42,6 @@ const searchOutputSchema = z.object({
   partialFailures: z.array(partialFailureSchema),
   queriesExecutedCount: z.number().int(),
 });
-
-function chooseProvider(
-  config: AppConfig,
-  demoMode: boolean | undefined,
-  deps: SearchDependencies,
-): { provider: SearchProvider; mode: "live" | "demo" } | AppError {
-  const useDemo = demoMode ?? config.demoMode;
-  if (useDemo) {
-    return { provider: new DemoSearchProvider(), mode: "demo" };
-  }
-  if (config.braveSearchApiKey.length === 0) {
-    return new AppError(
-      "provider_not_configured",
-      `Brave Search API 키가 없습니다. README의 ${README_SECTIONS.liveSearch} 절을 확인하세요.`,
-      false,
-      "BRAVE_SEARCH_API_KEY를 설정하거나 demoMode를 true로 실행하세요.",
-    );
-  }
-  return {
-    provider: new BraveSearchProvider(
-      config.braveSearchApiKey,
-      deps.fetchImpl ?? fetch,
-      config.httpTimeoutMs,
-      deps.sleep,
-    ),
-    mode: "live",
-  };
-}
 
 function consentError(): AppError {
   return new AppError(
@@ -174,7 +140,7 @@ export function registerSearchTools(
         });
         return errorResult(error);
       }
-      const selected = chooseProvider(config, input.demoMode, deps);
+      const selected = selectSearchProvider(config, input.demoMode, deps);
       if (selected instanceof AppError) {
         logEvent({
           event: "tool",

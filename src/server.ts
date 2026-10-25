@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { SERVER_NAME } from "./config/constants.js";
 import { getConfig, readServerVersion, type AppConfig } from "./config/env.js";
+import { registerAnalysisTools } from "./tools/analysis.js";
 import { registerSearchTools, type SearchDependencies } from "./tools/search.js";
 import { registerStatusTool } from "./tools/status.js";
 
@@ -14,5 +15,6 @@ export function createServer(
   });
   registerStatusTool(server, config);
   registerSearchTools(server, config, deps);
+  registerAnalysisTools(server, config, deps);
   return server;
 }
