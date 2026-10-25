@@ -24,6 +24,17 @@ export function readAudit(auditId: string, now = Date.now()): AuditResult | unde
   return entry.value;
 }
 
-export function clearAuditCache(): void {
+export function countAudits(now = Date.now()): number {
+  for (const [id, entry] of audits) {
+    if (entry.expiresAt <= now) {
+      audits.delete(id);
+    }
+  }
+  return audits.size;
+}
+
+export function clearAuditCache(): number {
+  const count = audits.size;
   audits.clear();
+  return count;
 }

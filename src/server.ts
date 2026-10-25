@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/server";
 import { SERVER_NAME } from "./config/constants.js";
 import { getConfig, readServerVersion, type AppConfig } from "./config/env.js";
 import { registerAnalysisTools } from "./tools/analysis.js";
+import { registerCaseTools } from "./tools/cases.js";
 import { registerPolicyTools } from "./tools/policy.js";
 import { registerReportTool } from "./tools/report.js";
 import { registerSearchTools, type SearchDependencies } from "./tools/search.js";
@@ -20,5 +21,6 @@ export function createServer(
   registerAnalysisTools(server, config, deps);
   registerPolicyTools(server);
   registerReportTool(server);
+  registerCaseTools(server, config);
   return server;
 }
