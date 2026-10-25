@@ -1,0 +1,41 @@
+{
+  "name": "digital-laundry-mcp",
+  "version": "1.0.0",
+  "description": "잊힐 권리를 위한 AI 기반 MCP 에이전트. 사용자가 잊고있던 온라인 디지털 흔적을 찾아내고 삭제 절차를 지원합니다.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jungwj0706/digital-laundry-mcp.git"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jungwj0706/digital-laundry-mcp/issues"
+  },
+  "homepage": "https://github.com/jungwj0706/digital-laundry-mcp#readme",
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.4.0",
+    "dotenv": "^18.0.9",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@modelcontextprotocol/client": "^2.4.0",
+    "@types/node": "^24.19.2",
+    "eslint": "^9.39.5",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.0",
+    "vitest": "^3.2.7"
+  }
+}

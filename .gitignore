@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+.env
+data/
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+.DS_Store
+digital-laundry-development-plan.md
