@@ -98,4 +98,4 @@ npm run print-cursor-config
 
 이 서버는 비공개 페이지, 로그인 이후 화면, 얼굴 데이터베이스, 백그라운드 감시, 자동 삭제, 자동 신고를 하지 않습니다. 위험 점수는 검토 순서이고 법적 판단이 아닙니다. 만 14세 미만은 법정대리인 동의와 14세 미만 공식 안내를 사용합니다.
 
-자세한 구조는 `docs/ARCHITECTURE.md`, 데이터 처리는 `docs/PRIVACY.md`를 보세요.
+자세한 구조는 `docs/ARCHITECTURE.md`, 데이터 처리는 `docs/PRIVACY.md`, URL 연결과 레시피는 `docs/VOOY.md`를 보세요.

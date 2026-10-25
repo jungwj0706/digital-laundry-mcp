@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "tsx src/index.ts",
     "start": "node dist/index.js",
+    "start:http": "node dist/http.js",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
     "lint": "eslint .",
