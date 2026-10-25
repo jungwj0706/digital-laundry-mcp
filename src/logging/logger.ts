@@ -1,3 +1,5 @@
+import { redactSensitive } from "../security/redact.js";
+
 export interface LogFields {
   event: "start" | "stop" | "tool";
   toolName?: string;
@@ -31,7 +33,7 @@ export function logEvent(fields: LogFields): void {
 
   const payload: Record<string, string | number> = { event: fields.event };
   if (fields.toolName !== undefined) {
-    payload.toolName = fields.toolName;
+    payload.toolName = redactSensitive(fields.toolName);
   }
   if (fields.durationMs !== undefined) {
     payload.durationMs = fields.durationMs;
@@ -40,13 +42,13 @@ export function logEvent(fields: LogFields): void {
     payload.resultCount = fields.resultCount;
   }
   if (fields.errorCode !== undefined) {
-    payload.errorCode = fields.errorCode;
+    payload.errorCode = redactSensitive(fields.errorCode);
   }
   if (fields.provider !== undefined) {
-    payload.provider = fields.provider;
+    payload.provider = redactSensitive(fields.provider);
   }
   if (fields.correlationId !== undefined) {
-    payload.correlationId = fields.correlationId;
+    payload.correlationId = redactSensitive(fields.correlationId);
   }
   console.error(JSON.stringify(payload));
 }

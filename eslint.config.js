@@ -8,6 +8,14 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    files: ["scripts/**/*.mjs"],
+    languageOptions: {
+      globals: {
+        process: "readonly",
+      },
+    },
+  },
+  {
     rules: {
       "no-console": ["error", { allow: ["error"] }],
       "@typescript-eslint/no-unused-vars": [

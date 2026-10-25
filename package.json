@@ -12,7 +12,8 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate-encryption-key": "node scripts/generate-encryption-key.mjs"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,7 @@
   "homepage": "https://github.com/jungwj0706/digital-laundry-mcp#readme",
   "dependencies": {
     "@modelcontextprotocol/server": "^2.4.0",
+    "cheerio": "^1.2.0",
     "dotenv": "^18.0.9",
     "zod": "^4.6.7"
   },

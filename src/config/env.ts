@@ -3,6 +3,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { config as loadDotenv } from "dotenv";
 import * as z from "zod/v4";
+import { isEncryptionKey } from "../security/crypto.js";
+
+export { isEncryptionKey };
 
 const emptyToUndefined = (value: unknown): unknown =>
   value === undefined || value === "" ? undefined : value;
@@ -89,14 +92,6 @@ export function readServerVersion(): string {
   const raw = readFileSync(path.join(projectRootFromHere(), "package.json"), "utf8");
   const parsed = JSON.parse(raw) as { version?: unknown };
   return typeof parsed.version === "string" ? parsed.version : "0.0.0";
-}
-
-export function isEncryptionKey(value: string): boolean {
-  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(value) || value.length < 43) {
-    return false;
-  }
-  const bytes = Buffer.from(value, "base64");
-  return bytes.length === 32;
 }
 
 function resolveConfiguredPath(root: string, configured: string): string {
