@@ -51,7 +51,7 @@ const envSchema = z.object({
   DL_HTTP_MAX_BYTES: boundedInt(1, 20_000_000, 2_097_152),
   DL_IMAGE_MAX_BYTES: boundedInt(1, 20_000_000, 5_242_880),
   DL_HTTP_ENABLED: booleanString("false"),
-  DL_HTTP_PORT: boundedInt(1, 65_535, 8787),
+  DL_HTTP_PORT: boundedInt(1, 65_535, 3333),
   DL_HTTP_AUTH_TOKEN: z.string().optional().default(""),
 });
 
@@ -153,7 +153,7 @@ export function parseConfig(
 
   const data = parsed.data;
   const httpAuthToken = data.DL_HTTP_AUTH_TOKEN.trim();
-  if (data.DL_HTTP_ENABLED === "true" && httpAuthToken.length < 16) {
+  if (httpAuthToken.length > 0 && httpAuthToken.length < 16) {
     throw new ConfigError(["DL_HTTP_AUTH_TOKEN"]);
   }
   const encryptionKey = data.DL_DATA_ENCRYPTION_KEY.trim();

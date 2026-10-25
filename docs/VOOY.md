@@ -1,24 +1,15 @@
 # Vooy 연결
 
-이 서버의 기본 실행은 stdio입니다. Vooy처럼 URL로 MCP를 붙일 때만 HTTP를 켭니다.
+원격 MCP 주소는 `http://localhost:3333/mcp` 하나입니다. 서버는 `127.0.0.1`에만 붙습니다.
 
 ## 실행
-
-`.env`에 다음을 넣습니다. 토큰은 16자 이상이어야 하고, 이 값보다 짧으면 프로세스가 포트를 열지 않습니다.
-
-```bash
-DL_HTTP_ENABLED=true
-DL_HTTP_PORT=8787
-DL_HTTP_AUTH_TOKEN=긴-임의의-토큰
-DL_DEMO_MODE=true
-```
 
 ```bash
 npm run build
 npm run start:http
 ```
 
-수신 주소는 `127.0.0.1`입니다. 인증 없는 공개 서버로 열리지 않습니다. 모든 `/mcp` 요청은 `Authorization: Bearer` 헤더가 있어야 합니다. 토큰을 URL 쿼리에 넣지 않습니다.
+기본 포트는 3333입니다. 토큰을 비워 두면 이 주소만으로 접속합니다. `DL_HTTP_AUTH_TOKEN`을 16자 이상으로 넣으면 `Authorization: Bearer`가 있어야 하고, 토큰을 URL 쿼리에 넣지 않습니다. 16자보다 짧은 토큰이면 서버가 시작하지 않습니다.
 
 ## 외부에서 도달
 

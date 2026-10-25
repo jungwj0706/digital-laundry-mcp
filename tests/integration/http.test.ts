@@ -10,6 +10,18 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 const token = "http-token-0123456789";
 
 describe("authenticated http and recipe", () => {
+  it("serves loopback mcp at port 3333 without a bearer token", async () => {
+    const config = parseConfig({ DL_DEMO_MODE: "true" });
+    expect(config.httpPort).toBe(3333);
+    const handle = createAuthorizedHandler(config);
+    const response = await handle(new Request("http://127.0.0.1:3333/mcp", {
+      method: "POST",
+      headers: { accept: "application/json, text/event-stream", "content-type": "application/json" },
+      body: "{}",
+    }));
+    expect(response.status).not.toBe(401);
+  });
+
   it("rejects a short token and a request without the bearer header", async () => {
     expect(() => parseConfig({
       DL_HTTP_ENABLED: "true",

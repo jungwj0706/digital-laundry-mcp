@@ -18,20 +18,33 @@ export function bearerMatches(header: string | null, token: string): boolean {
   return timingSafeEqual(expected, actual);
 }
 
+function withCors(response: Response): Response {
+  const headers = new Headers(response.headers);
+  headers.set("access-control-allow-origin", "*");
+  headers.set("access-control-allow-methods", "GET, POST, DELETE, OPTIONS");
+  headers.set("access-control-allow-headers", "content-type, accept, authorization, mcp-session-id, mcp-protocol-version");
+  headers.set("access-control-expose-headers", "mcp-session-id");
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
 export function createAuthorizedHandler(config: AppConfig): (request: Request) => Promise<Response> {
-  if (!config.httpEnabled || config.httpAuthToken.length < MIN_TOKEN_LENGTH) {
-    throw new ConfigError(["DL_HTTP_ENABLED", "DL_HTTP_AUTH_TOKEN"]);
+  if (config.httpAuthToken.length > 0 && config.httpAuthToken.length < MIN_TOKEN_LENGTH) {
+    throw new ConfigError(["DL_HTTP_AUTH_TOKEN"]);
   }
   const mcp = createMcpHandler(() => createServer(config));
+  const requireAuth = config.httpAuthToken.length >= MIN_TOKEN_LENGTH;
   return async (request) => {
     const url = new URL(request.url);
+    if (request.method === "OPTIONS") {
+      return withCors(new Response(null, { status: 204 }));
+    }
     if (url.pathname !== "/mcp") {
-      return new Response("not found", { status: 404 });
+      return withCors(new Response("not found", { status: 404 }));
     }
-    if (!bearerMatches(request.headers.get("authorization"), config.httpAuthToken)) {
-      return new Response("unauthorized", { status: 401 });
+    if (requireAuth && !bearerMatches(request.headers.get("authorization"), config.httpAuthToken)) {
+      return withCors(new Response("unauthorized", { status: 401 }));
     }
-    return mcp.fetch(request);
+    return withCors(await mcp.fetch(request));
   };
 }
 
@@ -104,13 +117,9 @@ const isDirectRun = entryArg !== undefined
 if (isDirectRun) {
   try {
     const config = loadConfig();
-    if (!config.httpEnabled) {
-      logEvent({ event: "start", errorCode: "invalid_input" });
-      process.exit(1);
-    }
     const running = await startHttpServer(config);
     logEvent({ event: "start" });
-    process.stderr.write(`listening 127.0.0.1:${running.port}\n`);
+    process.stderr.write(`http://127.0.0.1:${running.port}/mcp\n`);
     const stop = (): void => {
       logEvent({ event: "stop" });
       void running.close();

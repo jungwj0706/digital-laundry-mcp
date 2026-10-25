@@ -19,7 +19,7 @@ cp .env.example .env
 npm run build
 ```
 
-개발 중에는 `npm run dev`, 빌드 결과는 `npm start`로 실행합니다. 기본 전송은 stdio입니다.
+개발 중에는 `npm run dev`, 빌드 결과는 `npm start`로 실행합니다. 기본 전송은 stdio입니다. URL로 붙일 때는 `npm run start:http`이고 주소는 `http://localhost:3333/mcp`입니다.
 
 ## 환경 변수
 
