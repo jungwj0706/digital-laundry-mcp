@@ -1,17 +1,18 @@
 import { AppError } from "../../domain/errors.js";
 import type { ProviderSearchHit, SearchProvider, SearchQuery } from "../interfaces.js";
 
-interface BraveWebResult {
+interface KakaoWebDocument {
   title?: unknown;
   url?: unknown;
-  description?: unknown;
-  age?: unknown;
+  contents?: unknown;
+  datetime?: unknown;
 }
 
 const RETRY_DELAYS_MS = [200, 400];
+const SEARCH_URL = "https://dapi.kakao.com/v2/search/web";
 
-export class BraveSearchProvider implements SearchProvider {
-  readonly name = "brave";
+export class KakaoSearchProvider implements SearchProvider {
+  readonly name = "kakao";
   readonly sourceType = "web" as const;
 
   constructor(
@@ -28,9 +29,9 @@ export class BraveSearchProvider implements SearchProvider {
     if (this.apiKey.length === 0) {
       throw new AppError(
         "provider_not_configured",
-        "Brave Search API 키가 없습니다. README의 라이브 검색 설정 절을 확인하세요.",
+        "카카오 REST API 키가 없습니다. README의 라이브 검색 설정 절을 확인하세요.",
         false,
-        "BRAVE_SEARCH_API_KEY를 설정하거나 데모 모드로 실행하세요.",
+        "KAKAO_REST_API_KEY를 설정하거나 데모 모드로 실행하세요.",
       );
     }
 
@@ -51,12 +52,11 @@ export class BraveSearchProvider implements SearchProvider {
   }
 
   private async request(text: string, count: number): Promise<ProviderSearchHit[]> {
-    const url = new URL("https://api.search.brave.com/res/v1/web/search");
-    url.searchParams.set("q", text);
-    url.searchParams.set("count", String(count));
-    url.searchParams.set("country", "KR");
-    url.searchParams.set("search_lang", "ko");
-    url.searchParams.set("safesearch", "strict");
+    const size = Math.min(50, Math.max(1, Math.floor(count)));
+    const url = new URL(SEARCH_URL);
+    url.searchParams.set("query", text);
+    url.searchParams.set("sort", "accuracy");
+    url.searchParams.set("size", String(size));
 
     let response: Response;
     try {
@@ -64,7 +64,7 @@ export class BraveSearchProvider implements SearchProvider {
         method: "GET",
         headers: {
           accept: "application/json",
-          "x-subscription-token": this.apiKey,
+          Authorization: `KakaoAK ${this.apiKey}`,
         },
         signal: AbortSignal.timeout(this.timeoutMs),
       });
@@ -113,26 +113,43 @@ export class BraveSearchProvider implements SearchProvider {
         "잠시 후 다시 시도하세요.",
       );
     }
-    return mapBraveResults(payload);
+    return mapKakaoResults(payload);
   }
 }
 
-function mapBraveResults(payload: unknown): ProviderSearchHit[] {
-  const web = (payload as { web?: { results?: unknown } } | null)?.web;
-  const results = Array.isArray(web?.results) ? web.results : [];
+function stripKakaoMarkup(value: string): string {
+  return value
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function mapKakaoResults(payload: unknown): ProviderSearchHit[] {
+  const documents = (payload as { documents?: unknown } | null)?.documents;
+  const results = Array.isArray(documents) ? documents : [];
   const hits: ProviderSearchHit[] = [];
   for (const item of results) {
-    const record = item as BraveWebResult;
+    const record = item as KakaoWebDocument;
     if (typeof record.title !== "string" || typeof record.url !== "string") {
       continue;
     }
+    const title = stripKakaoMarkup(record.title).slice(0, 300);
+    if (title.length === 0) {
+      continue;
+    }
+    const snippet =
+      typeof record.contents === "string" ? stripKakaoMarkup(record.contents).slice(0, 500) : "";
     hits.push({
-      title: record.title.slice(0, 300),
+      title,
       url: record.url,
-      ...(typeof record.description === "string"
-        ? { snippet: record.description.slice(0, 500) }
-        : {}),
-      ...(typeof record.age === "string" ? { publishedAt: record.age.slice(0, 40) } : {}),
+      ...(snippet.length > 0 ? { snippet } : {}),
+      ...(typeof record.datetime === "string" ? { publishedAt: record.datetime.slice(0, 40) } : {}),
     });
   }
   return hits;

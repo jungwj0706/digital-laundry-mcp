@@ -83,10 +83,14 @@ describe("public footprint search", () => {
 
   it("keeps successful results when one query fails and retries rate limits", async () => {
     const calls: string[] = [];
-    const fetchImpl: typeof fetch = async (input) => {
+    const apiKey = "test-key-should-stay-out-of-logs";
+    const fetchImpl: typeof fetch = async (input, init) => {
       const url = new URL(String(input));
-      calls.push(url.searchParams.get("q") ?? "");
-      const query = url.searchParams.get("q");
+      expect(url.origin + url.pathname).toBe("https://dapi.kakao.com/v2/search/web");
+      expect(url.toString()).not.toContain(apiKey);
+      expect(new Headers(init?.headers).get("authorization")).toBe(`KakaoAK ${apiKey}`);
+      calls.push(url.searchParams.get("query") ?? "");
+      const query = url.searchParams.get("query");
       if (query === "first-query") {
         return new Response("limited", { status: 429 });
       }
@@ -95,22 +99,21 @@ describe("public footprint search", () => {
       }
       return new Response(
         JSON.stringify({
-          web: {
-            results: [
-              {
-                title: "공개 게시글",
-                url: "https://example.test/live",
-                description: "스니펫",
-              },
-            ],
-          },
+          documents: [
+            {
+              title: "<b>공개</b> 게시글",
+              url: "https://example.test/live",
+              contents: "스니펫 &amp; 설명",
+              datetime: "2026-01-02T03:04:05.000+09:00",
+            },
+          ],
         }),
         { status: 200, headers: { "content-type": "application/json" } },
       );
     };
     const config = parseConfig({
       DL_DEMO_MODE: "false",
-      BRAVE_SEARCH_API_KEY: "test-key-should-stay-out-of-logs",
+      KAKAO_REST_API_KEY: apiKey,
     });
     const lines: string[] = [];
     const original = console.error;
@@ -137,7 +140,12 @@ describe("public footprint search", () => {
           };
           expect(body.ok).toBe(true);
           expect(body.results.map((item) => item.url)).toEqual(["https://example.test/live"]);
-          expect(body.results[0]?.isDemo).toBe(false);
+          expect(body.results[0]).toMatchObject({
+            isDemo: false,
+            title: "공개 게시글",
+            snippet: "스니펫 & 설명",
+            provider: "kakao",
+          });
           expect(body.partialFailures.map((item) => item.code)).toContain("provider_error");
 
           await client.callTool({

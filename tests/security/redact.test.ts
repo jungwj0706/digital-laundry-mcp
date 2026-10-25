@@ -4,7 +4,7 @@ import { redactSensitive } from "../../src/security/redact.js";
 
 describe("redactSensitive", () => {
   it("removes emails, url paths, and long secrets from logs", () => {
-    const secret = "brave-live-key-value-0123456789";
+    const secret = "kakao-live-key-value-0123456789";
     const lines: string[] = [];
     const original = console.error;
     console.error = (line?: unknown) => {
@@ -15,7 +15,7 @@ describe("redactSensitive", () => {
         event: "tool",
         toolName: `search user@example.com ${secret} https://example.test/private?q=nickname`,
         errorCode: "provider_error",
-        provider: "brave",
+        provider: "kakao",
         correlationId: "11111111-1111-4111-8111-111111111111",
       });
     } finally {

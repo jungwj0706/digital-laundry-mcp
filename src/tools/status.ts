@@ -24,9 +24,9 @@ export type ServiceStatus = z.infer<typeof serviceStatusSchema>;
 
 export function buildServiceStatus(config: AppConfig): ServiceStatus {
   const missingConfiguration: ServiceStatus["missingConfiguration"] = [];
-  if (config.braveSearchApiKey.length === 0) {
+  if (config.kakaoRestApiKey.length === 0) {
     missingConfiguration.push({
-      name: "BRAVE_SEARCH_API_KEY",
+      name: "KAKAO_REST_API_KEY",
       readmeSection: README_SECTIONS.liveSearch,
     });
   }
@@ -52,7 +52,7 @@ export function buildServiceStatus(config: AppConfig): ServiceStatus {
   return {
     serverVersion: readServerVersion(),
     demoMode: config.demoMode,
-    searchProviderConfigured: config.braveSearchApiKey.length > 0,
+    searchProviderConfigured: config.kakaoRestApiKey.length > 0,
     imageProviderConfigured: config.googleCloudVisionApiKey.length > 0,
     persistenceEnabled: config.persistenceEnabled,
     policyCheckedAt: POLICY_CHECKED_AT,

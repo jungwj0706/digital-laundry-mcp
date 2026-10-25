@@ -121,7 +121,7 @@ export function registerSearchTools(
     {
       title: "공개 흔적 검색",
       description:
-        "사용자가 지정한 검색어로 공개 웹을 검색합니다. 검색어는 Brave Search API로 전송될 수 있으며 confirmExternalSearch가 true일 때만 실행합니다. 데모 모드는 합성 데이터만 반환합니다. 이 도구는 게시물을 삭제하거나 신고하지 않습니다.",
+        "사용자가 지정한 검색어로 공개 웹을 검색합니다. 검색어는 카카오 다음 검색으로 전송될 수 있으며 confirmExternalSearch가 true일 때만 실행합니다. 데모 모드는 합성 데이터만 반환합니다. 이 도구는 게시물을 삭제하거나 신고하지 않습니다.",
       inputSchema: searchInputSchema,
       outputSchema: z.union([searchOutputSchema, toolFailureSchema]),
       annotations: { readOnlyHint: true },

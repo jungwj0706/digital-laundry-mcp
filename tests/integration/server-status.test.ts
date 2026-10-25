@@ -9,13 +9,13 @@ import { withMcpClient } from "../helpers/mcpClient.js";
 describe("get_service_status", () => {
   it("lists the tool and hides credential values", async () => {
     const root = mkdtempSync(path.join(tmpdir(), "dl-status-"));
-    const braveKey = "brave-test-key-should-never-appear";
+    const kakaoKey = "kakao-test-key-should-never-appear";
     const visionKey = "vision-test-key-should-never-appear";
     const config = parseConfig(
       {
         DL_DEMO_MODE: "true",
         DL_ENABLE_PERSISTENCE: "true",
-        BRAVE_SEARCH_API_KEY: braveKey,
+        KAKAO_REST_API_KEY: kakaoKey,
         GOOGLE_CLOUD_VISION_API_KEY: visionKey,
         DL_EXPORT_DIR: root,
       },
@@ -34,7 +34,7 @@ describe("get_service_status", () => {
           arguments: {},
         });
         const serialized = JSON.stringify(result);
-        expect(serialized).not.toContain(braveKey);
+        expect(serialized).not.toContain(kakaoKey);
         expect(serialized).not.toContain(visionKey);
         expect(result.structuredContent).toMatchObject({
           demoMode: true,
@@ -48,7 +48,7 @@ describe("get_service_status", () => {
           result.structuredContent as { missingConfiguration: { name: string }[] }
         ).missingConfiguration.map((item) => item.name);
         expect(missing).toContain("DL_DATA_ENCRYPTION_KEY");
-        expect(missing).not.toContain("BRAVE_SEARCH_API_KEY");
+        expect(missing).not.toContain("KAKAO_REST_API_KEY");
       },
     );
   });

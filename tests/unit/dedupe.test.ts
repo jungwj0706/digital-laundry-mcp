@@ -6,7 +6,7 @@ function result(url: string, title: string): SearchResult {
   return {
     id: url,
     sourceType: "web",
-    provider: "brave",
+    provider: "kakao",
     title,
     url,
     domain: "example.test",

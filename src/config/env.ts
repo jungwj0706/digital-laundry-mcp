@@ -32,7 +32,7 @@ const envSchema = z.object({
     emptyToUndefined,
     z.enum(["debug", "info", "warn", "error"]).default("info"),
   ),
-  BRAVE_SEARCH_API_KEY: z.string().optional().default(""),
+  KAKAO_REST_API_KEY: z.string().optional().default(""),
   GOOGLE_CLOUD_VISION_API_KEY: z.string().optional().default(""),
   DL_ENABLE_PERSISTENCE: booleanString("false"),
   DL_DATA_ENCRYPTION_KEY: z.string().optional().default(""),
@@ -69,7 +69,7 @@ export interface AppConfig {
   nodeEnv: "development" | "test" | "production";
   demoMode: boolean;
   logLevel: "debug" | "info" | "warn" | "error";
-  braveSearchApiKey: string;
+  kakaoRestApiKey: string;
   googleCloudVisionApiKey: string;
   persistenceRequested: boolean;
   encryptionKey: string;
@@ -123,7 +123,7 @@ export function parseConfig(
     NODE_ENV: source.NODE_ENV,
     DL_DEMO_MODE: source.DL_DEMO_MODE,
     DL_LOG_LEVEL: source.DL_LOG_LEVEL,
-    BRAVE_SEARCH_API_KEY: source.BRAVE_SEARCH_API_KEY,
+    KAKAO_REST_API_KEY: source.KAKAO_REST_API_KEY,
     GOOGLE_CLOUD_VISION_API_KEY: source.GOOGLE_CLOUD_VISION_API_KEY,
     DL_ENABLE_PERSISTENCE: source.DL_ENABLE_PERSISTENCE,
     DL_DATA_ENCRYPTION_KEY: source.DL_DATA_ENCRYPTION_KEY,
@@ -165,7 +165,7 @@ export function parseConfig(
     nodeEnv: data.NODE_ENV,
     demoMode: data.DL_DEMO_MODE === "true",
     logLevel: data.DL_LOG_LEVEL,
-    braveSearchApiKey: data.BRAVE_SEARCH_API_KEY.trim(),
+    kakaoRestApiKey: data.KAKAO_REST_API_KEY.trim(),
     googleCloudVisionApiKey: data.GOOGLE_CLOUD_VISION_API_KEY.trim(),
     persistenceRequested: data.DL_ENABLE_PERSISTENCE === "true",
     encryptionKey,

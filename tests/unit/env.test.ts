@@ -12,7 +12,7 @@ describe("parseConfig", () => {
     const config = parseConfig({});
     expect(config.demoMode).toBe(true);
     expect(config.persistenceEnabled).toBe(false);
-    expect(config.braveSearchApiKey).toBe("");
+    expect(config.kakaoRestApiKey).toBe("");
     expect(config.retentionDays).toBe(30);
   });
 

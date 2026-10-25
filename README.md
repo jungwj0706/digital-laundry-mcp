@@ -35,11 +35,20 @@ npm run generate-encryption-key
 
 ## 라이브 검색 설정
 
-`BRAVE_SEARCH_API_KEY`가 있고 `DL_DEMO_MODE=false`일 때만 Brave Search를 호출합니다. 키가 없으면 검색은 실패로 반환되고, 데모 모드가 성공한 라이브 검색처럼 보이면 안 됩니다.
+`KAKAO_REST_API_KEY`가 있고 `DL_DEMO_MODE=false`일 때만 카카오 다음 검색의 웹문서 API를 호출합니다. 키가 없으면 검색은 실패로 반환되고, 데모 모드가 성공한 라이브 검색처럼 보이면 안 됩니다.
 
-문서: https://api-dashboard.search.brave.com/app/documentation/web-search/get-started
+카카오 디벨로퍼스에서 앱을 만들면 REST API 키가 바로 나옵니다. 유료 플랜이나 카드 등록은 필요 없습니다.
 
-호출 전에 `confirmExternalSearch`가 true여야 합니다. 별칭이 검색 제공자에게 전송됩니다.
+1. https://developers.kakao.com 에서 카카오 계정으로 로그인하고 개발자로 등록합니다.
+2. 내 애플리케이션에서 애플리케이션을 추가합니다.
+3. 앱 키의 REST API 키를 `KAKAO_REST_API_KEY`에 넣습니다.
+4. `.env`에서 `DL_DEMO_MODE=false`로 바꿉니다.
+
+문서: https://developers.kakao.com/docs/latest/ko/daum-search/dev-guide
+
+웹문서 검색은 하루 30,000회까지 무료입니다. 한도: https://developers.kakao.com/docs/latest/ko/getting-started/quota
+
+다음 검색의 한국어 웹 문서를 대상으로 합니다. 호출 전에 `confirmExternalSearch`가 true여야 합니다. 별칭이 카카오로 전송됩니다.
 
 ## 이미지 역검색 설정
 
@@ -86,7 +95,7 @@ npm run print-cursor-config
 
 ## 문제 해결
 
-- 라이브 검색이 `provider_not_configured`이면 Brave 키 또는 데모 모드를 확인합니다.
+- 라이브 검색이 `provider_not_configured`이면 카카오 REST API 키 또는 데모 모드를 확인합니다.
 - 이미지 도구만 실패하면 Vision 키를 확인합니다. 다른 도구는 그대로 사용할 수 있습니다.
 - 저장이 `storage_disabled`이면 영구 저장 스위치와 32바이트 키를 확인합니다.
 - 점검 식별자를 찾지 못하면 프로세스가 다시 시작됐거나 60분이 지난 메모리 캐시입니다.
